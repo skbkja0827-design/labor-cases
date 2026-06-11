@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>노무 판례 검색기</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{
+  --green:#1f4e3d; --green-2:#2d6a4f; --green-soft:#e8f1ec;
+  --bg:#f3f6f4; --card:#ffffff; --line:#e2e9e4;
+  --text:#1c2823; --muted:#6b7c72; --gold:#a07c1f; --red:#b4423a;
+}
+*{box-sizing:border-box; margin:0; padding:0}
+body{
+  font-family:'Pretendard','Noto Sans KR','맑은 고딕','Malgun Gothic',sans-serif;
+  background:var(--bg); color:var(--text); font-size:15px; line-height:1.55;
+}
+button{font-family:inherit; cursor:pointer}
+input,select{font-family:inherit}
+
+header{
+  position:sticky; top:0; z-index:30;
+  background:linear-gradient(135deg,#173c2f,#1f4e3d 60%,#27604b);
+  color:#fff; box-shadow:0 2px 10px rgba(23,60,47,.25);
+}
+.h-in{max-width:1080px; margin:0 auto; padding:14px 20px;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap}
+.h-title{font-size:19px; font-weight:800; letter-spacing:-.3px}
+.h-title .sub{font-size:12px; font-weight:500; color:#bcd9cb; margin-left:8px}
+.h-stats{margin-left:auto; font-size:12.5px; color:#cfe6da; text-align:right}
+.h-btns{display:flex; gap:8px}
+.h-btn{
+  background:rgba(255,255,255,.13); color:#fff; border:1px solid rgba(255,255,255,.25);
+  border-radius:8px; padding:7px 13px; font-size:13px; font-weight:600;
+}
+.h-btn:hover{background:rgba(255,255,255,.22)}
+
+.wrap{max-width:1080px; margin:0 auto; padding:0 20px 70px}
+.hero{padding:26px 0 6px}
+.searchbox{
+  display:flex; gap:10px; background:var(--card); border:2px solid var(--green);
+  border-radius:14px; padding:6px 6px 6px 18px; align-items:center;
+  box-shadow:0 4px 16px rgba(31,78,61,.08);
+}
+.searchbox input{
+  flex:1; border:none; outline:none; font-size:16.5px; padding:10px 0; background:none;
+}
+.searchbox button{
+  background:var(--green); color:#fff; border:none; border-radius:10px;
+  padding:12px 26px; font-size:15.5px; font-weight:700;
+}
+.searchbox button:hover{background:var(--green-2)}
+.hero .hint{font-size:12.5px; color:var(--muted); margin:8px 4px 0}
+.mode{display:flex; gap:6px; margin:12px 2px 0; align-items:center; flex-wrap:wrap}
+.mode .pill{
+  border:1px solid var(--line); background:#fff; border-radius:999px;
+  padding:5px 14px; font-size:13px; color:var(--muted); font-weight:600;
+}
+.mode .pill.on{background:var(--green); border-color:var(--green); color:#fff}
+.chips{display:flex; gap:6px; flex-wrap:wrap; margin-left:6px}
+.chip{
+  background:var(--green-soft); color:var(--green); border-radius:999px;
+  padding:4px 12px; font-size:12.5px; font-weight:700;
+}
+
+.filters{
+  display:flex; gap:8px; flex-wrap:wrap; align-items:center;
+  margin:16px 0 4px; padding:12px 14px; background:var(--card);
+  border:1px solid var(--line); border-radius:12px;
+}
+.filters label{font-size:12.5px; color:var(--muted); font-weight:700; margin-left:6px}
+.filters select,.filters input{
+  border:1px solid var(--line); border-radius:8px; padding:7px 9px;
+  font-size:13.5px; background:#fff; color:var(--text);
+}
+.filters .reset{
+  margin-left:auto; background:none; border:1px solid var(--line);
+  border-radius:8px; padding:7px 12px; font-size:12.5px; color:var(--muted);
+}
+.meta-line{display:flex; align-items:baseline; gap:10px; margin:14px 4px 4px}
+.meta-line .total{font-size:14.5px; font-weight:800; color:var(--green)}
+.meta-line .desc{font-size:12.5px; color:var(--muted)}
+
+.card{
+  background:var(--card); border:1px solid var(--line); border-radius:13px;
+  padding:15px 18px; margin:10px 0; cursor:pointer;
+  transition:box-shadow .15s, transform .15s, border-color .15s;
+}
+.card:hover{box-shadow:0 6px 18px rgba(31,78,61,.13); border-color:#bcd2c6;
+  transform:translateY(-1px)}
+.badges{display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-bottom:7px}
+.badge{font-size:11.5px; font-weight:700; border-radius:6px; padding:2.5px 8px}
+.b-date{background:var(--green-soft); color:var(--green)}
+.b-court{background:#eef1ee; color:#4c5b52}
+.b-court.sup{background:#f5eedb; color:var(--gold)}
+.b-cat{margin-left:auto; background:#fff; border:1px solid var(--line); color:var(--muted)}
+.card h3{font-size:15.5px; font-weight:750; letter-spacing:-.2px; color:#173c2f}
+.card .sub{font-size:12.5px; color:var(--muted); margin-top:3px}
+.card .summ{
+  font-size:13.5px; color:#3c4f45; margin-top:8px;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+.more{
+  display:block; margin:18px auto; background:#fff; border:1.5px solid var(--green);
+  color:var(--green); font-weight:700; border-radius:10px; padding:10px 34px; font-size:14px;
+}
+.more:hover{background:var(--green-soft)}
+.empty{text-align:center; color:var(--muted); padding:60px 0; font-size:14.5px}
+.empty b{color:var(--green)}
+
+.overlay{
+  position:fixed; inset:0; background:rgba(20,32,26,.45); z-index:40;
+  opacity:0; pointer-events:none; transition:opacity .2s;
+}
+.overlay.on{opacity:1; pointer-events:auto}
+.drawer{
+  position:fixed; top:0; right:-760px; width:min(740px,94vw); height:100vh;
+  background:#fbfdfc; z-index:50; box-shadow:-8px 0 30px rgba(0,0,0,.18);
+  transition:right .25s ease; display:flex; flex-direction:column;
+}
+.drawer.on{right:0}
+.d-head{background:var(--green); color:#fff; padding:16px 22px}
+.d-head h2{font-size:16.5px; font-weight:750; line-height:1.4; letter-spacing:-.2px}
+.d-head .m{font-size:12.5px; color:#c6e0d3; margin-top:5px}
+.d-bar{display:flex; gap:8px; padding:10px 22px; border-bottom:1px solid var(--line);
+  background:#fff; align-items:center}
+.d-bar a{
+  border:1px solid var(--line); background:#fff; border-radius:8px;
+  padding:6px 13px; font-size:12.5px; font-weight:700; color:var(--green);
+  text-decoration:none;
+}
+.d-bar .close{margin-left:auto; color:var(--muted); border:1px solid var(--line);
+  background:#fff; border-radius:8px; padding:6px 13px; font-size:12.5px; font-weight:700}
+.d-body{overflow-y:auto; padding:18px 24px 50px; flex:1}
+.d-sec{margin-bottom:18px}
+.d-sec h4{
+  font-size:12.5px; color:var(--green); font-weight:800; margin-bottom:6px;
+  padding-left:8px; border-left:3px solid var(--green);
+}
+.d-sec .tx{font-size:14px; color:#2c3b33; white-space:pre-wrap; word-break:break-all}
+.d-summline{
+  background:var(--green-soft); border-radius:10px; padding:12px 14px;
+  font-size:13.5px; color:#234c3c; margin-bottom:18px;
+}
+.d-note{font-size:12.5px; color:var(--muted); margin-top:8px; line-height:1.6}
+
+@media (max-width:640px){ .h-stats{display:none} .searchbox button{padding:12px 16px} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="h-in">
+    <div class="h-title">⚖ 노무 판례 검색기<span class="sub">법제처 국가법령정보 기반</span></div>
+    <div class="h-btns">
+      <button class="h-btn" id="btnCsv">CSV 내보내기</button>
+    </div>
+    <div class="h-stats" id="stats">불러오는 중…</div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="hero">
+    <div class="searchbox">
+      <input id="q" placeholder="궁금한 상황을 그대로 물어보세요 — 예: 무단결근이 잦은 직원을 해고할 수 있을까?" autofocus>
+      <button id="btnSearch">검색</button>
+    </div>
+    <div class="hint">문장으로 물어보면 핵심 키워드를 알아듣고 비슷한 사례를 함께 찾아줍니다. 사건번호(예: 2020다247190)로도 검색됩니다.</div>
+    <div class="mode">
+      <button class="pill on" id="mSmart">스마트 검색</button>
+      <button class="pill" id="mExact">정확히 일치</button>
+      <div class="chips" id="chips"></div>
+    </div>
+  </div>
+
+  <div class="filters">
+    <label>카테고리</label>
+    <select id="fCat"><option value="">전체</option></select>
+    <label>법원</label>
+    <select id="fCourt">
+      <option value="">전체</option><option>대법원</option><option>하급심</option>
+    </select>
+    <label>기간</label>
+    <input type="date" id="fFrom"> ~ <input type="date" id="fTo">
+    <label>정렬</label>
+    <select id="fSort">
+      <option value="auto">자동(관련도)</option>
+      <option value="rel">관련도순</option>
+      <option value="date">최신순</option>
+    </select>
+    <button class="reset" id="btnReset">초기화</button>
+  </div>
+
+  <div class="meta-line"><span class="total" id="total"></span><span class="desc" id="totalDesc"></span></div>
+  <div id="list"><div class="empty">데이터를 불러오는 중입니다…</div></div>
+  <button class="more" id="btnMore" style="display:none">더 보기</button>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<div class="drawer" id="drawer">
+  <div class="d-head"><h2 id="dTitle"></h2><div class="m" id="dMeta"></div></div>
+  <div class="d-bar">
+    <a id="dLink" target="_blank" rel="noopener">원문 열기(법제처)</a>
+    <button class="close" id="dClose">닫기 ✕</button>
+  </div>
+  <div class="d-body" id="dBody"></div>
+</div>
+
+<script src="./app.js"></script>
+</body>
+</html>
