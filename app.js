@@ -302,7 +302,7 @@ function bindEvents() {
     runSearch();
   };
   $('btnMore').onclick = appendPage;
-  $('btnCsv').onclick = exportCsv;
+  const _csv = $('btnCsv'); if (_csv) _csv.onclick = exportCsv;  // 배포용엔 CSV 버튼 없음
   $('overlay').onclick = closeCase;
   $('dClose').onclick = closeCase;
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCase(); });
